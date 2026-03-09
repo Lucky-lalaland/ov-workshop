@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小章魚的觀影閱讀記錄本 🐙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .logo-icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #1a1a1a;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #666;
+            margin: 30px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Add Button */
+        .add-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fff;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .add-btn:hover {
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        /* Item Card */
+        .item-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .item-card:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .item-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .badge.rewatch {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .badge.status-reading {
+            border-color: #666;
+            color: #666;
+        }
+
+        .badge.status-done {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        /* Rating */
+        .rating {
+            display: flex;
+            gap: 4px;
+            margin: 10px 0;
+        }
+
+        .star {
+            font-size: 16px;
+            color: #ddd;
+            cursor: pointer;
+        }
+
+        .star.filled {
+            color: #1a1a1a;
+        }
+
+        /* Notes */
+        .item-notes {
+            font-size: 13px;
+            color: #444;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-style: italic;
+        }
+
+        /* Timer */
+        .timer-display {
+            font-size: 32px;
+            font-weight: 200;
+            text-align: center;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-btn {
+            padding: 12px 30px;
+            background: #fff;
+            border: 1px solid #1a1a1a;
+            border-radius: 25px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .timer-btn:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .timer-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 200;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .stat-card.full-width {
+            grid-column: span 2;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #1a1a1a;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #333;
+        }
+
+        /* Rating Input */
+        .rating-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rating-input .star {
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .rating-input .star:hover {
+            transform: scale(1.2);
+        }
+
+        /* Type Selector */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .type-btn:hover, .type-btn.active {
+            border-color: #1a1a1a;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        /* Item Actions */
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: #1a1a1a;
+        }
+
+        .action-btn.delete:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* Rewatch Log */
+        .rewatch-log {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .rewatch-entry {
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 12px;
+        }
+
+        .rewatch-entry:last-child {
+            border-bottom: none;
+        }
+
+        .rewatch-date {
+            color: #666;
+        }
+
+        /* Session Log */
+        .session-log {
+            margin-top: 10px;
+        }
+
+        .session-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 12px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ccc;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">🐙</span>
+                <span>記錄本</span>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="list">記錄</button>
+                <button class="nav-btn" data-tab="timer">計時</button>
+                <button class="nav-btn" data-tab="stats">統計</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- List Tab -->
+        <div class="tab-content active" id="list-tab">
+            <button class="add-btn" onclick="openAddModal()">+ 添加新記錄</button>
+
+            <div class="section-title">正在進行</div>
+            <div id="reading-list"></div>
+
+            <div class="section-title">已完成</div>
+            <div id="completed-list"></div>
+
+            <div class="section-title">想看 / 想讀</div>
+            <div id="wishlist"></div>
+        </div>
+
+        <!-- Timer Tab -->
+        <div class="tab-content" id="timer-tab">
+            <div class="section-title">閱讀計時器</div>
+            
+            <div class="timer-display" id="timer-display">00:00:00</div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn" id="timer-start" onclick="toggleTimer()">開始</button>
+                <button class="timer-btn" id="timer-reset" onclick="resetTimer()">重置</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">選擇正在閱讀的書籍</label>
+                <select class="form-select" id="timer-book-select">
+                    <option value="">選擇書籍...</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">起始頁數</label>
+                    <input type="number" class="form-input" id="start-page" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">結束頁數</label>
+                    <input type="number" class="form-input" id="end-page" placeholder="0">
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="saveReadingSession()">保存閱讀記錄</button>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="tab-content" id="stats-tab">
+            <div class="section-title">本月統計</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="month-books">0</div>
+                    <div class="stat-label">本書讀完</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="month-movies">0</div>
+                    <div class="stat-label">部電影</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="month-episodes">0</div>
+                    <div class="stat-label">集劇集</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="month-hours">0</div>
+                    <div class="stat-label">小時閱讀</div>
+                </div>
+            </div>
+
+            <div class="section-title">年度統計</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="year-books">0</div>
+                    <div class="stat-label">本書讀完</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="year-movies">0</div>
+                    <div class="stat-label">部電影</div>
+                </div>
+                <div class="stat-card full-width">
+                    <div class="stat-number" id="year-hours">0</div>
+                    <div class="stat-label">小時總閱讀時長</div>
+                </div>
+            </div>
+
+            <div class="section-title">重刷紀錄</div>
+            <div class="stats-grid">
+                <div class="stat-card full-width">
+                    <div class="stat-number" id="total-rewatches">0</div>
+                    <div class="stat-label">次重刷體驗</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        用愛製作 by 克克 💙 給我的小章魚
+    </footer>
+
+    <!-- Add Modal -->
+    <div class="modal" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">添加新記錄</span>
+                <button class="close-modal" onclick="closeAddModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="type-selector">
+                    <button class="type-btn active" data-type="book" onclick="selectType('book')">📖 書籍</button>
+                    <button class="type-btn" data-type="movie" onclick="selectType('movie')">🎬 電影</button>
+                    <button class="type-btn" data-type="series" onclick="selectType('series')">📺 劇集</button>
+                </div>
+
+                <form id="add-form">
+                    <div class="form-group">
+                        <label class="form-label">標題</label>
+                        <input type="text" class="form-input" id="item-title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">作者 / 導演</label>
+                        <input type="text" class="form-input" id="item-author">
+                    </div>
+
+                    <div class="form-group" id="pages-group">
+                        <label class="form-label">總頁數</label>
+                        <input type="number" class="form-input" id="item-pages">
+                    </div>
+
+                    <div class="form-group" id="episodes-group" style="display: none;">
+                        <div class="form-row">
+                            <div>
+                                <label class="form-label">當前集數</label>
+                                <input type="number" class="form-input" id="current-episode" value="0">
+                            </div>
+                            <div>
+                                <label class="form-label">總集數</label>
+                                <input type="number" class="form-input" id="total-episodes">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">狀態</label>
+                        <select class="form-select" id="item-status">
+                            <option value="wishlist">想看 / 想讀</option>
+                            <option value="reading">正在進行</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">這是第幾刷？</label>
+                        <select class="form-select" id="item-rewatch">
+                            <option value="1">一刷</option>
+                            <option value="2">二刷</option>
+                            <option value="3">三刷</option>
+                            <option value="4">四刷+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">評分</label>
+                        <div class="rating-input" id="rating-input">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">標籤（用逗號分隔）</label>
+                        <input type="text" class="form-input" id="item-tags" placeholder="論文相關, 南方電影, 縣城空間...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">筆記 / 短評</label>
+                        <textarea class="form-textarea" id="item-notes" placeholder="寫下你的想法..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">保存</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        let items = JSON.parse(localStorage.getItem('octopusTracker') || '[]');
+        let currentType = 'book';
+        let currentRating = 0;
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let timerRunning = false;
+
+        // Tab Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+                
+                if (btn.dataset.tab === 'timer') {
+                    updateBookSelect();
+                } else if (btn.dataset.tab === 'stats') {
+                    updateStats();
+                }
+            });
+        });
+
+        // Type Selection
+        function selectType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            
+            document.getElementById('pages-group').style.display = type === 'book' ? 'block' : 'none';
+            document.getElementById('episodes-group').style.display = type === 'series' ? 'block' : 'none';
+        }
+
+        // Rating Input
+        document.getElementById('rating-input').addEventListener('click', (e) => {
+            if (e.target.classList.contains('star')) {
+                currentRating = parseInt(e.target.dataset.rating);
+                updateRatingDisplay();
+            }
+        });
+
+        function updateRatingDisplay() {
+            document.querySelectorAll('#rating-input .star').forEach((star, index) => {
+                star.textContent = index < currentRating ? '★' : '☆';
+                star.classList.toggle('filled', index < currentRating);
+            });
+        }
+
+        // Modal
+        function openAddModal() {
+            document.getElementById('add-modal').classList.add('active');
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('active');
+            document.getElementById('add-form').reset();
+            currentRating = 0;
+            updateRatingDisplay();
+        }
+
+        // Form Submit
+        document.getElementById('add-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const item = {
+                id: Date.now(),
+                type: currentType,
+                title: document.getElementById('item-title').value,
+                author: document.getElementById('item-author').value,
+                pages: parseInt(document.getElementById('item-pages').value) || 0,
+                currentPage: 0,
+                currentEpisode: parseInt(document.getElementById('current-episode').value) || 0,
+                totalEpisodes: parseInt(document.getElementById('total-episodes').value) || 0,
+                status: document.getElementById('item-status').value,
+                rewatch: parseInt(document.getElementById('item-rewatch').value),
+                rating: currentRating,
+                tags: document.getElementById('item-tags').value.split(',').map(t => t.trim()).filter(t => t),
+                notes: document.getElementById('item-notes').value,
+                dateAdded: new Date().toISOString(),
+                dateCompleted: document.getElementById('item-status').value === 'completed' ? new Date().toISOString() : null,
+                sessions: [],
+                rewatchLog: []
+            };
+
+            items.push(item);
+            saveData();
+            renderLists();
+            closeAddModal();
+        });
+
+        // Render Lists
+        function renderLists() {
+            const reading = items.filter(i => i.status === 'reading');
+            const completed = items.filter(i => i.status === 'completed');
+            const wishlist = items.filter(i => i.status === 'wishlist');
+
+            document.getElementById('reading-list').innerHTML = reading.length 
+                ? reading.map(renderItem).join('') 
+                : '<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">還沒有正在進行的項目</div></div>';
+
+            document.getElementById('completed-list').innerHTML = completed.length 
+                ? completed.map(renderItem).join('') 
+                : '<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">完成的項目會顯示在這裡</div></div>';
+
+            document.getElementById('wishlist').innerHTML = wishlist.length 
+                ? wishlist.map(renderItem).join('') 
+                : '<div class="empty-state"><div class="empty-icon">🌙</div><div class="empty-text">想看的都會在這裡等你</div></div>';
+        }
+
+        function renderItem(item) {
+            const typeIcon = item.type === 'book' ? '📖' : item.type === 'movie' ? '🎬' : '📺';
+            const rewatchText = item.rewatch > 1 ? `${['', '一', '二', '三', '四'][item.rewatch] || item.rewatch}刷` : '';
+            
+            let progressHtml = '';
+            if (item.type === 'book' && item.pages > 0) {
+                const percent = Math.round((item.currentPage / item.pages) * 100);
+                progressHtml = `
+                    <div class="progress-container">
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%"></div></div>
+                        <div class="progress-text"><span>${item.currentPage} / ${item.pages} 頁</span><span>${percent}%</span></div>
+                    </div>`;
+            } else if (item.type === 'series' && item.totalEpisodes > 0) {
+                const percent = Math.round((item.currentEpisode / item.totalEpisodes) * 100);
+                progressHtml = `
+                    <div class="progress-container">
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%"></div></div>
+                        <div class="progress-text"><span>第 ${item.currentEpisode} / ${item.totalEpisodes} 集</span><span>${percent}%</span></div>
+                    </div>`;
+            }
+
+            const ratingHtml = item.rating > 0 
+                ? `<div class="rating">${'★'.repeat(item.rating)}${'☆'.repeat(5-item.rating)}</div>` 
+                : '';
+
+            const notesHtml = item.notes 
+                ? `<div class="item-notes">"${item.notes}"</div>` 
+                : '';
+
+            const sessionsHtml = item.sessions && item.sessions.length > 0 
+                ? `<div class="session-log">${item.sessions.slice(-3).map(s => 
+                    `<div class="session-entry"><span>${s.date}</span><span>${s.pages}頁 · ${s.duration}</span></div>`
+                ).join('')}</div>` 
+                : '';
+
+            return `
+                <div class="item-card" data-id="${item.id}">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${typeIcon} ${item.title}</div>
+                            <div class="item-meta">${item.author || ''}${item.dateCompleted ? ' · 完成於 ' + new Date(item.dateCompleted).toLocaleDateString('zh-TW') : ''}</div>
+                        </div>
+                        <div class="item-badges">
+                            ${rewatchText ? `<span class="badge rewatch">${rewatchText}</span>` : ''}
+                            ${item.tags.slice(0, 2).map(t => `<span class="badge">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    ${progressHtml}
+                    ${ratingHtml}
+                    ${notesHtml}
+                    ${sessionsHtml}
+                    <div class="item-actions">
+                        ${item.status === 'reading' ? `<button class="action-btn" onclick="updateProgress(${item.id})">更新進度</button>` : ''}
+                        ${item.status !== 'completed' ? `<button class="action-btn" onclick="markComplete(${item.id})">標記完成</button>` : ''}
+                        ${item.status === 'completed' ? `<button class="action-btn" onclick="addRewatch(${item.id})">再刷一遍</button>` : ''}
+                        <button class="action-btn delete" onclick="deleteItem(${item.id})">刪除</button>
+                    </div>
+                </div>`;
+        }
+
+        // Actions
+        function updateProgress(id) {
+            const item = items.find(i => i.id === id);
+            if (item.type === 'book') {
+                const newPage = prompt(`當前讀到第幾頁？(共 ${item.pages} 頁)`, item.currentPage);
+                if (newPage !== null) {
+                    item.currentPage = parseInt(newPage) || 0;
+                }
+            } else if (item.type === 'series') {
+                const newEp = prompt(`當前看到第幾集？(共 ${item.totalEpisodes} 集)`, item.currentEpisode);
+                if (newEp !== null) {
+                    item.currentEpisode = parseInt(newEp) || 0;
+                }
+            }
+            saveData();
+            renderLists();
+        }
+
+        function markComplete(id) {
+            const item = items.find(i => i.id === id);
+            item.status = 'completed';
+            item.dateCompleted = new Date().toISOString();
+            if (item.type === 'book') item.currentPage = item.pages;
+            if (item.type === 'series') item.currentEpisode = item.totalEpisodes;
+            saveData();
+            renderLists();
+        }
+
+        function addRewatch(id) {
+            const item = items.find(i => i.id === id);
+            item.rewatchLog.push({
+                count: item.rewatch,
+                date: item.dateCompleted,
+                rating: item.rating,
+                notes: item.notes
+            });
+            item.rewatch += 1;
+            item.status = 'reading';
+            item.dateCompleted = null;
+            item.currentPage = 0;
+            item.currentEpisode = 0;
+            item.notes = '';
+            saveData();
+            renderLists();
+        }
+
+        function deleteItem(id) {
+            if (confirm('確定要刪除嗎？')) {
+                items = items.filter(i => i.id !== id);
+                saveData();
+                renderLists();
+            }
+        }
+
+        // Timer
+        function toggleTimer() {
+            timerRunning = !timerRunning;
+            document.getElementById('timer-start').textContent = timerRunning ? '暫停' : '開始';
+            document.getElementById('timer-start').classList.toggle('active', timerRunning);
+            
+            if (timerRunning) {
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            } else {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function resetTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            document.getElementById('timer-start').textContent = '開始';
+            document.getElementById('timer-start').classList.remove('active');
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timerSeconds / 3600);
+            const minutes = Math.floor((timerSeconds % 3600) / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timer-display').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateBookSelect() {
+            const books = items.filter(i => i.type === 'book' && i.status === 'reading');
+            document.getElementById('timer-book-select').innerHTML = 
+                '<option value="">選擇書籍...</option>' + 
+                books.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+        }
+
+        function saveReadingSession() {
+            const bookId = parseInt(document.getElementById('timer-book-select').value);
+            const startPage = parseInt(document.getElementById('start-page').value) || 0;
+            const endPage = parseInt(document.getElementById('end-page').value) || 0;
+            
+            if (!bookId) {
+                alert('請選擇一本書');
+                return;
+            }
+            
+            if (timerSeconds === 0) {
+                alert('還沒有計時記錄喔');
+                return;
+            }
+
+            const item = items.find(i => i.id === bookId);
+            const hours = Math.floor(timerSeconds / 3600);
+            const minutes = Math.floor((timerSeconds % 3600) / 60);
+            
+            item.sessions.push({
+                date: new Date().toLocaleDateString('zh-TW'),
+                duration: `${hours > 0 ? hours + '時' : ''}${minutes}分`,
+                seconds: timerSeconds,
+                pages: `${startPage}-${endPage}`,
+                pagesRead: endPage - startPage
+            });
+            
+            item.currentPage = Math.max(item.currentPage, endPage);
+            
+            saveData();
+            resetTimer();
+            document.getElementById('start-page').value = '';
+            document.getElementById('end-page').value = '';
+            alert('閱讀記錄已保存！');
+            renderLists();
+        }
+
+        // Stats
+        function updateStats() {
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+
+            const monthCompleted = items.filter(i => {
+                if (!i.dateCompleted) return false;
+                const d = new Date(i.dateCompleted);
+                return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+            });
+
+            const yearCompleted = items.filter(i => {
+                if (!i.dateCompleted) return false;
+                const d = new Date(i.dateCompleted);
+                return d.getFullYear() === thisYear;
+            });
+
+            document.getElementById('month-books').textContent = monthCompleted.filter(i => i.type === 'book').length;
+            document.getElementById('month-movies').textContent = monthCompleted.filter(i => i.type === 'movie').length;
+            document.getElementById('month-episodes').textContent = monthCompleted.filter(i => i.type === 'series').reduce((sum, i) => sum + i.totalEpisodes, 0);
+            
+            const monthReadingSeconds = items.reduce((sum, item) => {
+                return sum + (item.sessions || []).filter(s => {
+                    const d = new Date(s.date);
+                    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+                }).reduce((sSum, s) => sSum + (s.seconds || 0), 0);
+            }, 0);
+            document.getElementById('month-hours').textContent = Math.round(monthReadingSeconds / 3600);
+
+            document.getElementById('year-books').textContent = yearCompleted.filter(i => i.type === 'book').length;
+            document.getElementById('year-movies').textContent = yearCompleted.filter(i => i.type === 'movie').length;
+            
+            const yearReadingSeconds = items.reduce((sum, item) => {
+                return sum + (item.sessions || []).filter(s => {
+                    const d = new Date(s.date);
+                    return d.getFullYear() === thisYear;
+                }).reduce((sSum, s) => sSum + (s.seconds || 0), 0);
+            }, 0);
+            document.getElementById('year-hours').textContent = Math.round(yearReadingSeconds / 3600);
+
+            const totalRewatches = items.reduce((sum, i) => sum + (i.rewatchLog?.length || 0) + (i.rewatch > 1 ? 1 : 0), 0);
+            document.getElementById('total-rewatches').textContent = totalRewatches;
+        }
+
+        // Save Data
+        function saveData() {
+            localStorage.setItem('octopusTracker', JSON.stringify(items));
+        }
+
+        // Initialize
+        renderLists();
+    </script>
+</body>
+</html>
