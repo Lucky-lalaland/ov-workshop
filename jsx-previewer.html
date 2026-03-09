@@ -201,11 +201,8 @@ textarea::placeholder{color:var(--tx3)}
     $status.className='status idle';
     $status.textContent='編譯中...';
 
-    // Write to iframe
-    var doc=$frame.contentDocument||$frame.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
+    // Write to iframe using srcdoc (ensures Babel loads before parsing JSX)
+    $frame.srcdoc=html;
   }
 
   // Listen for messages from iframe
