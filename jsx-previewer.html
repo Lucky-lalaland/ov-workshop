@@ -204,6 +204,7 @@ textarea::placeholder{color:var(--tx3)}
     $status.textContent='編譯中...';
 
     // Write to iframe using srcdoc (ensures Babel loads before parsing JSX)
+    lastHtml=html;
     $frame.srcdoc=html;
   }
 
