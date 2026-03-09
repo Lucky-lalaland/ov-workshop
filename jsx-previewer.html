@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSX Previewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF8F5;--bg2:#F2EEE8;--tx:#1A1815;--tx2:#5C564E;--tx3:#9C958B;
+  --ac:#C5613E;--bd:#E3DED5;
+  --f:'Instrument Sans','Noto Sans TC',sans-serif;
+  --fm:'JetBrains Mono','SF Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--tx)}
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600}
+.logo svg{flex-shrink:0}
+.actions{display:flex;gap:6px}
+.btn{padding:6px 14px;border:1px solid var(--bd);border-radius:8px;background:0;font-family:var(--f);font-size:12.5px;color:var(--tx2);cursor:pointer;transition:.12s;display:flex;align-items:center;gap:5px}
+.btn:hover{background:rgba(0,0,0,.03)}
+.btn.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn.pri:hover{opacity:.9}
+
+.panels{flex:1;display:flex;overflow:hidden}
+.panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.panel+.panel{border-left:1px solid var(--bd)}
+.panel-hd{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--bd);font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;justify-content:space-between}
+.panel-hd .hint{font-weight:400;color:var(--tx3);font-size:11px}
+
+textarea{
+  flex:1;width:100%;border:0;outline:0;resize:none;padding:16px;
+  font-family:var(--fm);font-size:13px;line-height:1.6;
+  color:var(--tx);background:var(--bg);tab-size:2;
+}
+textarea::placeholder{color:var(--tx3)}
+
+.preview-wrap{flex:1;overflow:auto;background:#fff}
+.preview-wrap iframe{width:100%;height:100%;border:0}
+
+.status{padding:6px 14px;border-top:1px solid var(--bd);font-size:11.5px;display:flex;align-items:center;gap:6px}
+.status.ok{color:#4CAF50;background:rgba(76,175,80,.05)}
+.status.err{color:#E53935;background:rgba(229,57,53,.05)}
+.status.idle{color:var(--tx3);background:var(--bg2)}
+
+/* Examples dropdown */
+.examples{position:relative}
+.ex-menu{position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:6px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.1);display:none;z-index:10}
+.ex-menu.on{display:block}
+.ex-item{padding:7px 10px;border-radius:6px;font-size:12.5px;color:var(--tx2);cursor:pointer;transition:.1s}
+.ex-item:hover{background:rgba(0,0,0,.04)}
+
+@media(max-width:768px){
+  .panels{flex-direction:column}
+  .panel+.panel{border-left:0;border-top:1px solid var(--bd)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#C5613E"/><g transform="translate(14,14)"><circle r="2.2" fill="#fff"/><g stroke="#fff" stroke-width="1.6" stroke-linecap="round"><line y1="-4" y2="-7.5"/><line y1="4" y2="7.5"/><line x1="-4" x2="-7.5"/><line x1="4" x2="7.5"/><line x1="-2.8" y1="-2.8" x2="-5.3" y2="-5.3"/><line x1="2.8" y1="-2.8" x2="5.3" y2="-5.3"/><line x1="-2.8" y1="2.8" x2="-5.3" y2="5.3"/><line x1="2.8" y1="2.8" x2="5.3" y2="5.3"/></g></g></svg>
+      JSX Previewer
+    </div>
+    <div class="actions">
+      <div class="examples">
+        <button class="btn" id="btnEx">📎 範例</button>
+        <div class="ex-menu" id="exMenu">
+          <div class="ex-item" data-ex="hello">Hello World</div>
+          <div class="ex-item" data-ex="counter">計數器</div>
+          <div class="ex-item" data-ex="card">小卡片</div>
+        </div>
+      </div>
+      <button class="btn pri" id="btnRun">▶ 執行</button>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-hd">
+        <span>✏️ JSX 代碼</span>
+        <span class="hint">貼上代碼後點「執行」或按 Ctrl+Enter</span>
+      </div>
+      <textarea id="editor" placeholder="在這裡貼上你的 JSX 代碼...&#10;&#10;可以是 React 組件，例如：&#10;&#10;const App = () => {&#10;  const [count, setCount] = React.useState(0);&#10;  return (&#10;    <div>&#10;      <h1>Hello!</h1>&#10;      <button onClick={() => setCount(c => c+1)}>&#10;        點了 {count} 次&#10;      </button>&#10;    </div>&#10;  );&#10;};"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-hd">
+        <span>👁 預覽</span>
+        <span class="hint" id="previewHint"></span>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <iframe id="previewFrame"></iframe>
+      </div>
+      <div class="status idle" id="status">等待執行...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $ed=document.getElementById('editor');
+  var $frame=document.getElementById('previewFrame');
+  var $status=document.getElementById('status');
+  var $btnRun=document.getElementById('btnRun');
+  var $btnEx=document.getElementById('btnEx');
+  var $exMenu=document.getElementById('exMenu');
+
+  // Examples
+  var EXAMPLES={
+    hello:'const App = () => {\n  return (\n    <div style={{textAlign:"center",padding:"60px 20px",fontFamily:"sans-serif"}}>\n      <h1 style={{fontSize:"36px"}}>🐙 Hello 小章魚！</h1>\n      <p style={{color:"#666",fontSize:"18px",marginTop:"12px"}}>你的 JSX 預覽器在運作了！</p>\n    </div>\n  );\n};',
+    counter:'const App = () => {\n  const [count, setCount] = React.useState(0);\n  return (\n    <div style={{textAlign:"center",padding:"60px 20px",fontFamily:"sans-serif"}}>\n      <h1 style={{fontSize:"48px",marginBottom:"20px"}}>{count}</h1>\n      <div style={{display:"flex",gap:"10px",justifyContent:"center"}}>\n        <button\n          onClick={() => setCount(c => c - 1)}\n          style={{padding:"10px 24px",fontSize:"18px",borderRadius:"8px",border:"1px solid #ddd",background:"#fff",cursor:"pointer"}}\n        >−</button>\n        <button\n          onClick={() => setCount(c => c + 1)}\n          style={{padding:"10px 24px",fontSize:"18px",borderRadius:"8px",border:"none",background:"#C5613E",color:"#fff",cursor:"pointer"}}\n        >＋</button>\n      </div>\n      <p style={{marginTop:"16px",color:"#999",fontSize:"14px"}}>試試點按鈕！</p>\n    </div>\n  );\n};',
+    card:'const App = () => {\n  const [liked, setLiked] = React.useState(false);\n  return (\n    <div style={{display:"flex",justifyContent:"center",padding:"60px 20px",fontFamily:"sans-serif",background:"#FAF8F5",minHeight:"100vh"}}>\n      <div style={{maxWidth:"320px",background:"#fff",borderRadius:"16px",overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.08)"}}>\n        <div style={{height:"160px",background:"linear-gradient(135deg,#D4885C,#C55A3A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"60px"}}>🐙</div>\n        <div style={{padding:"20px"}}>\n          <h2 style={{fontSize:"18px",marginBottom:"8px"}}>小章魚的卡片</h2>\n          <p style={{color:"#666",fontSize:"14px",lineHeight:"1.6"}}>這是一個用 JSX 寫的互動卡片，點下面的愛心試試！</p>\n          <button\n            onClick={() => setLiked(!liked)}\n            style={{marginTop:"16px",padding:"8px 20px",borderRadius:"20px",border:"none",background:liked?"#E57373":"#f5f5f5",color:liked?"#fff":"#666",fontSize:"14px",cursor:"pointer",transition:"all 0.2s"}}\n          >{liked ? "❤️ 已喜歡" : "🤍 喜歡"}</button>\n        </div>\n      </div>\n    </div>\n  );\n};'
+  };
+
+  // Run
+  function run(){
+    var code=$ed.value.trim();
+    if(!code){$status.className='status idle';$status.textContent='沒有代碼';return}
+
+    // Build HTML that includes React + Babel + Tailwind
+    var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'+
+      '<script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>'+
+      '<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>'+
+      '<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>'+
+      '<script src="https://cdn.tailwindcss.com"><\/script>'+
+      '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">'+
+      '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Inter",sans-serif}</style>'+
+      '</head><body><div id="root"></div>'+
+      '<script type="text/babel">\n';
+
+    // Check if code has a default export or standalone component
+    // Wrap it to render
+    html+=code+'\n\n';
+
+    // Try to find the component name to render
+    // Look for: export default X, const X = (), function X(
+    var compName=null;
+    var defaultMatch=code.match(/export\s+default\s+(\w+)/);
+    if(defaultMatch)compName=defaultMatch[1];
+    if(!compName){
+      // Look for const App / function App pattern
+      var funcMatch=code.match(/(?:const|let|var|function)\s+(App|Component|Main|Page)\b/);
+      if(funcMatch)compName=funcMatch[1];
+    }
+    if(!compName){
+      // Take the first component-looking declaration (starts with uppercase)
+      var anyMatch=code.match(/(?:const|let|var|function)\s+([A-Z]\w*)\b/);
+      if(anyMatch)compName=anyMatch[1];
+    }
+
+    if(compName){
+      html+='try{\n';
+      html+='  const root = ReactDOM.createRoot(document.getElementById("root"));\n';
+      html+='  root.render(React.createElement('+compName+'));\n';
+      html+='  window.parent.postMessage({type:"jsx-ok"},"*");\n';
+      html+='}catch(e){\n';
+      html+='  window.parent.postMessage({type:"jsx-err",msg:e.message},"*");\n';
+      html+='  document.getElementById("root").innerHTML="<pre style=\\"color:#E53935;padding:20px;font-size:14px\\">"+e.message+"</pre>";\n';
+      html+='}\n';
+    }else{
+      // If no component found, just try to render the code as-is in case it's JSX elements
+      html+='try{\n';
+      html+='  const _El = () => ('+code+');\n';
+      html+='  const root = ReactDOM.createRoot(document.getElementById("root"));\n';
+      html+='  root.render(React.createElement(_El));\n';
+      html+='  window.parent.postMessage({type:"jsx-ok"},"*");\n';
+      html+='}catch(e){\n';
+      html+='  window.parent.postMessage({type:"jsx-err",msg:e.message},"*");\n';
+      html+='  document.getElementById("root").innerHTML="<pre style=\\"color:#E53935;padding:20px;font-size:14px\\">"+e.message+"</pre>";\n';
+      html+='}\n';
+    }
+
+    html+='<\/script></body></html>';
+
+    $status.className='status idle';
+    $status.textContent='編譯中...';
+
+    // Write to iframe
+    var doc=$frame.contentDocument||$frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }
+
+  // Listen for messages from iframe
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.type==='jsx-ok'){
+      $status.className='status ok';
+      $status.textContent='✓ 渲染成功';
+    }else if(e.data&&e.data.type==='jsx-err'){
+      $status.className='status err';
+      $status.textContent='✗ '+e.data.msg;
+    }
+  });
+
+  // Babel compile errors
+  $frame.addEventListener('load',function(){
+    // Check for Babel errors after a short delay
+    setTimeout(function(){
+      try{
+        var body=$frame.contentDocument.body;
+        if(body&&body.querySelector('.babel-error')){
+          $status.className='status err';
+          $status.textContent='✗ 編譯錯誤';
+        }
+      }catch(e){}
+    },1000);
+  });
+
+  // Button events
+  $btnRun.addEventListener('click',run);
+
+  // Ctrl+Enter to run
+  $ed.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run()}
+    // Tab to insert spaces
+    if(e.key==='Tab'){
+      e.preventDefault();
+      var start=$ed.selectionStart,end=$ed.selectionEnd;
+      $ed.value=$ed.value.substring(0,start)+'  '+$ed.value.substring(end);
+      $ed.selectionStart=$ed.selectionEnd=start+2;
+    }
+  });
+
+  // Examples
+  $btnEx.addEventListener('click',function(e){
+    e.stopPropagation();
+    $exMenu.classList.toggle('on');
+  });
+  document.addEventListener('click',function(){$exMenu.classList.remove('on')});
+  document.querySelectorAll('.ex-item').forEach(function(item){
+    item.addEventListener('click',function(e){
+      e.stopPropagation();
+      var key=item.getAttribute('data-ex');
+      if(EXAMPLES[key]){$ed.value=EXAMPLES[key];run()}
+      $exMenu.classList.remove('on');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
