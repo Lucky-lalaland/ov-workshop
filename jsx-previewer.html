@@ -159,17 +159,20 @@ textarea::placeholder{color:var(--tx3)}
 
     // Try to find the component name to render
     var compName=null;
-    // Look for function/const declarations with uppercase names
-    var funcMatch=code.match(/(?:const|let|var|function)\s+(App|Component|Main|Page)\b/);
-    if(funcMatch)compName=funcMatch[1];
+    // Priority 1: export default (this is always the entry component)
+    var expMatch=raw.match(/export\s+default\s+(?:function\s+)?(\w+)/);
+    if(expMatch)compName=expMatch[1];
+    // Priority 2: common names like App, Component, Main, Page
     if(!compName){
-      var anyMatch=code.match(/(?:const|let|var|function)\s+([A-Z]\w*)\b/);
-      if(anyMatch)compName=anyMatch[1];
+      var funcMatch=code.match(/(?:const|let|var|function)\s+(App|Component|Main|Page)\b/);
+      if(funcMatch)compName=funcMatch[1];
     }
-    // Also check original code for export default ComponentName
+    // Priority 3: find the LAST uppercase component (usually the main one, sub-components come first)
     if(!compName){
-      var expMatch=raw.match(/export\s+default\s+(?:function\s+)?(\w+)/);
-      if(expMatch)compName=expMatch[1];
+      var allMatches=code.matchAll(/(?:const|let|var|function)\s+([A-Z]\w*)\b/g);
+      var last=null;
+      for(var m of allMatches)last=m[1];
+      if(last)compName=last;
     }
 
     if(compName){
