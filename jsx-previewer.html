@@ -220,9 +220,11 @@ textarea::placeholder{color:var(--tx3)}
   // Listen for messages from iframe
   window.addEventListener('message',function(e){
     if(e.data&&e.data.type==='jsx-ok'){
+      if(window._compileTimer)clearTimeout(window._compileTimer);
       $status.className='status ok';
       $status.textContent='✓ 渲染成功';
     }else if(e.data&&e.data.type==='jsx-err'){
+      if(window._compileTimer)clearTimeout(window._compileTimer);
       $status.className='status err';
       $status.textContent='✗ '+e.data.msg;
     }
