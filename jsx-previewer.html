@@ -115,10 +115,34 @@ textarea::placeholder{color:var(--tx3)}
     card:'const App = () => {\n  const [liked, setLiked] = React.useState(false);\n  return (\n    <div style={{display:"flex",justifyContent:"center",padding:"60px 20px",fontFamily:"sans-serif",background:"#FAF8F5",minHeight:"100vh"}}>\n      <div style={{maxWidth:"320px",background:"#fff",borderRadius:"16px",overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.08)"}}>\n        <div style={{height:"160px",background:"linear-gradient(135deg,#D4885C,#C55A3A)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"60px"}}>🐙</div>\n        <div style={{padding:"20px"}}>\n          <h2 style={{fontSize:"18px",marginBottom:"8px"}}>小章魚的卡片</h2>\n          <p style={{color:"#666",fontSize:"14px",lineHeight:"1.6"}}>這是一個用 JSX 寫的互動卡片，點下面的愛心試試！</p>\n          <button\n            onClick={() => setLiked(!liked)}\n            style={{marginTop:"16px",padding:"8px 20px",borderRadius:"20px",border:"none",background:liked?"#E57373":"#f5f5f5",color:liked?"#fff":"#666",fontSize:"14px",cursor:"pointer",transition:"all 0.2s"}}\n          >{liked ? "❤️ 已喜歡" : "🤍 喜歡"}</button>\n        </div>\n      </div>\n    </div>\n  );\n};'
   };
 
+  // Preprocess: convert ES module syntax to browser-compatible code
+  function preprocess(code){
+    // Convert: import { useState, useEffect } from "react"  →  const { useState, useEffect } = React;
+    code=code.replace(/import\s*\{([^}]+)\}\s*from\s*["']react["'];?/g,'const {$1} = React;');
+    // Convert: import React from "react"  →  (remove, React is already global)
+    code=code.replace(/import\s+React\s*(?:,\s*\{[^}]*\})?\s*from\s*["']react["'];?/g,'');
+    // Convert: import { createRoot } from "react-dom/client"  →  const { createRoot } = ReactDOM;
+    code=code.replace(/import\s*\{([^}]+)\}\s*from\s*["']react-dom(?:\/client)?["'];?/g,'const {$1} = ReactDOM;');
+    // Convert: import ReactDOM from "react-dom"  →  (remove, ReactDOM is already global)
+    code=code.replace(/import\s+ReactDOM\s*from\s*["']react-dom["'];?/g,'');
+    // Remove any other import lines (third-party libs that won't resolve anyway)
+    code=code.replace(/import\s+.*from\s*["'][^"']+["'];?/g,'// [import removed]');
+    // Convert: export default function X  →  function X
+    code=code.replace(/export\s+default\s+function\s+/g,'function ');
+    // Convert: export default const X  →  const X  (rare but possible)
+    code=code.replace(/export\s+default\s+const\s+/g,'const ');
+    // Convert: export default X  (standalone, at end)  →  (remove)
+    code=code.replace(/^export\s+default\s+(\w+)\s*;?\s*$/gm,'');
+    // Remove any remaining export keywords
+    code=code.replace(/export\s+/g,'');
+    return code;
+  }
+
   // Run
   function run(){
-    var code=$ed.value.trim();
-    if(!code){$status.className='status idle';$status.textContent='沒有代碼';return}
+    var raw=$ed.value.trim();
+    if(!raw){$status.className='status idle';$status.textContent='沒有代碼';return}
+    var code=preprocess(raw);
 
     // Build HTML that includes React + Babel + Tailwind
     var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'+
@@ -131,24 +155,21 @@ textarea::placeholder{color:var(--tx3)}
       '</head><body><div id="root"></div>'+
       '<script type="text/babel">\n';
 
-    // Check if code has a default export or standalone component
-    // Wrap it to render
     html+=code+'\n\n';
 
     // Try to find the component name to render
-    // Look for: export default X, const X = (), function X(
     var compName=null;
-    var defaultMatch=code.match(/export\s+default\s+(\w+)/);
-    if(defaultMatch)compName=defaultMatch[1];
+    // Look for function/const declarations with uppercase names
+    var funcMatch=code.match(/(?:const|let|var|function)\s+(App|Component|Main|Page)\b/);
+    if(funcMatch)compName=funcMatch[1];
     if(!compName){
-      // Look for const App / function App pattern
-      var funcMatch=code.match(/(?:const|let|var|function)\s+(App|Component|Main|Page)\b/);
-      if(funcMatch)compName=funcMatch[1];
-    }
-    if(!compName){
-      // Take the first component-looking declaration (starts with uppercase)
       var anyMatch=code.match(/(?:const|let|var|function)\s+([A-Z]\w*)\b/);
       if(anyMatch)compName=anyMatch[1];
+    }
+    // Also check original code for export default ComponentName
+    if(!compName){
+      var expMatch=raw.match(/export\s+default\s+(?:function\s+)?(\w+)/);
+      if(expMatch)compName=expMatch[1];
     }
 
     if(compName){
@@ -161,7 +182,6 @@ textarea::placeholder{color:var(--tx3)}
       html+='  document.getElementById("root").innerHTML="<pre style=\\"color:#E53935;padding:20px;font-size:14px\\">"+e.message+"</pre>";\n';
       html+='}\n';
     }else{
-      // If no component found, just try to render the code as-is in case it's JSX elements
       html+='try{\n';
       html+='  const _El = () => ('+code+');\n';
       html+='  const root = ReactDOM.createRoot(document.getElementById("root"));\n';
