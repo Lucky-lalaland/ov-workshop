@@ -203,6 +203,15 @@ textarea::placeholder{color:var(--tx3)}
     $status.className='status idle';
     $status.textContent='編譯中...';
 
+    // Timeout detection: if no response in 15s, likely CDN failed
+    if(window._compileTimer)clearTimeout(window._compileTimer);
+    window._compileTimer=setTimeout(function(){
+      if($status.textContent==='編譯中...'){
+        $status.className='status err';
+        $status.textContent='✗ 資源加載超時，請檢查網絡或重試';
+      }
+    },15000);
+
     // Write to iframe using srcdoc (ensures Babel loads before parsing JSX)
     lastHtml=html;
     $frame.srcdoc=html;
