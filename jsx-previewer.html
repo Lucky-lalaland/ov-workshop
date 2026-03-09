@@ -127,6 +127,14 @@ textarea::placeholder{color:var(--tx3)}
     code=code.replace(/import\s*\{([^}]+)\}\s*from\s*["']react-dom(?:\/client)?["'];?/g,'const {$1} = ReactDOM;');
     // Convert: import ReactDOM from "react-dom"  →  (remove, ReactDOM is already global)
     code=code.replace(/import\s+ReactDOM\s*from\s*["']react-dom["'];?/g,'');
+    // Convert: import { X, Y } from "lucide-react" → create placeholder icon components
+    code=code.replace(/import\s*\{([^}]+)\}\s*from\s*["']lucide-react["'];?/g,function(m,names){
+      return names.split(',').map(function(n){
+        var name=n.trim();
+        if(!name)return '';
+        return 'const '+name+' = (props) => React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",width:props&&props.size||24,height:props&&props.size||24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",className:props&&props.className||"",...props,size:undefined},React.createElement("circle",{cx:12,cy:12,r:10}));';
+      }).join('\n');
+    });
     // Remove any other import lines (third-party libs that won't resolve anyway)
     code=code.replace(/import\s+.*from\s*["'][^"']+["'];?/g,'// [import removed]');
     // Convert: export default function X  →  function X
