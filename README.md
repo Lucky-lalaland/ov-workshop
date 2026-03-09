@@ -21,9 +21,11 @@ Octo + Veran 的小工具工作坊。
 ## JSX Previewer 功能
 
 - 貼入 React JSX 代碼即時渲染
-- 內建 React 18 + Babel + Tailwind
+- 自動轉換 ES Module 語法（`import/export`），從任何地方複製的 JSX 直接貼上就能跑
+- 內建 React 18 + Babel + Tailwind + Google Fonts
 - 範例代碼一鍵載入
 - Ctrl+Enter 快速執行
+- ⛶ 全屏預覽：一鍵在新分頁打開，完整網頁體驗
 
 ---
 
